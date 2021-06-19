@@ -10,10 +10,10 @@ class Student:
     def rate_lecture(self, lecturer, course, grade):
         if isinstance(lecturer,
                       Lecturer) and course in lecturer.courses_attached and course in self.courses_in_progress:
-            # if course in lecturer.grades:
-            lecturer.grades += [grade]
-            # else:
-            #     student.grades[course] = [grade]
+            if course in lecturer.grades:
+                lecturer.grades[course] += [grade]
+            else:
+                lecturer.grades[course] = [grade]
         else:
             return 'Ошибка'
 
@@ -55,10 +55,18 @@ class Lecturer(Mentor):
     def __init__(self, name, surname):
         super().__init__(name, surname)
         # self.courses_attached = []
-        self.grades = []
+        self.grades = {}
+
+    def get_avarage_lectur(self):
+        sum_lectur = 0
+        count_lectur = 0
+        for grades in self.grades.values():
+            sum_lectur += sum(grades)
+            count_lectur += len(grades)
+        return sum_lectur / count_lectur
 
     def __str__(self):
-        res = f'Имя: {self.name} \nФамилия: {self.surname} \nСредняя оценка за лекции: {sum(self.grades) / len(self.grades)}'
+        res = f'Имя: {self.name} \nФамилия: {self.surname} \nСредняя оценка за лекции: {self.get_avarage_lectur()}'
         return res
 
     def __lt__(self, other):
@@ -66,7 +74,7 @@ class Lecturer(Mentor):
             print('Нет такого преподавателя')
             return
         else:
-            compare = (sum(self.grades) / len(self.grades)) > (sum(other.grades) / len(other.grades))
+            compare = self.get_avarage_lectur() > other.get_avarage_lectur()
             if compare:
                 print(f'{self.name} {self.surname} преподаёт лучше, чем {other.name} {other.surname}')
             else:
@@ -88,6 +96,24 @@ class Reviewer(Mentor):
     def __str__(self):
         res = f'Имя: {self.name} \nФамилия: {self.surname}'
         return res
+
+
+def avarage_grade_hw(student_list, course):
+    sum_grades = 0
+    for student in student_list:
+        for courses, grades in student.grades.items():
+            if courses == course:
+                sum_grades += sum(grades) / len(grades)
+    return sum_grades / len(student_list)
+
+
+def avarage_grade_lecturer(lecturer_list, course):
+    sum_grades = 0
+    for lecturer in lecturer_list:
+        for courses, grades in lecturer.grades.items():
+            if courses == course:
+                sum_grades += sum(grades) / len(grades)
+    return sum_grades / len(lecturer_list)
 
 
 best_student = Student('Ruoy', 'Eman', 'your_gender')
@@ -137,7 +163,7 @@ print(cool_reviewer)
 print('-----------')
 print(cool_lecturer)
 print(another_lecturer)
-print()
+print('-----------')
 print(cool_lecturer < another_lecturer)
 # print(cool_lecturer.grades)
 # print(another_lecturer.grades)
@@ -146,5 +172,15 @@ print(best_student)
 # print(best_student.grades)
 print(another_student)
 # print(another_student.grades)
-print()
+print('-----------')
 print(best_student < another_student)
+print('-----------')
+print(
+    f'Cредняя оценка за домашние задания по всем студентам в рамках курса Python: {avarage_grade_hw([best_student, another_student], "Python")}')
+print(
+    f'Cредняя оценка за домашние задания по всем студентам в рамках курса GIT: {avarage_grade_hw([best_student, another_student], "GIT")}')
+print('-----------')
+print(
+    f'Cредняя оценка за лекции всех лекторов в рамках курса Python: {avarage_grade_lecturer([cool_lecturer, another_lecturer], "Python")}')
+print(
+    f'Cредняя оценка за лекции всех лекторов в рамках курса GIT: {avarage_grade_lecturer([cool_lecturer, another_lecturer], "GIT")}')
